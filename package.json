@@ -13,6 +13,7 @@
     "dotenv": "^16.0.1",
     "gcal-get-events": "^1.0.2",
     "luxon": "^3.0.3",
-    "node-fetch": "^3.2.10"
+    "node-fetch": "^3.2.10",
+    "node-schedule": "^2.1.0"
   }
 }

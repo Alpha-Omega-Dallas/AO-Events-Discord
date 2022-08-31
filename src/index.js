@@ -7,12 +7,16 @@ import {
 let client = new Client({ intents: "GuildScheduledEvents" });
 import EventsManager from "./EventsManager.js";
 import { DateTime } from "luxon";
+import schedule from "node-schedule";
 dotenv.config();
 
 client.on("ready", async (client) => {
   console.log("Logged in as " + client.user.tag);
-  postEvents();
-  // setInterval(postEvents, 1000 * 60 * 60 * 24);
+  // postEvents();
+
+  // At 00:00 on Sunday
+  // https://crontab.guru/#0_0_*_*_0
+  schedule.scheduleJob("0 0 * * 0", postEvents);
 });
 
 async function postEvents() {
@@ -21,7 +25,7 @@ async function postEvents() {
   let start = new Date();
   // start.setDate(start.getDate());
   let end = new Date();
-  // end.setDate(end.getDate());
+  end.setDate(end.getDate() + 7);
 
   let events = await new EventsManager().getEvents(start, end);
   if (events.length == 0) return console.log("No Events Today");
@@ -61,7 +65,7 @@ async function postEvents() {
       entityType: GuildScheduledEventEntityType.External,
       description: description,
       entityMetadata: { location: "Alpha Omega" },
-      channel: guild.channels.cache.get("1014006617118883935"),
+      channel: guild.channels.cache.get(process.env.CHANNEL_ID),
     };
 
     guild.scheduledEvents.create(eventOptions);
