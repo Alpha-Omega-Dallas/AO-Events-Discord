@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import {
+  ActivityType,
   Client,
   GuildScheduledEventEntityType,
   GuildScheduledEventPrivacyLevel,
@@ -12,6 +13,10 @@ dotenv.config();
 
 client.on("ready", async (client) => {
   console.log("Logged in as " + client.user.tag);
+  client.user.setActivity({
+    name: "the band",
+    type: ActivityType.Watching,
+  });
   // postEvents();
 
   // At 00:00 on Sunday
