@@ -1,24 +1,27 @@
 import dotenv from "dotenv";
-import { Client, EmbedBuilder } from "discord.js";
-let client = new Client({ intents: "Guilds" });
+import {
+  Client,
+  GuildScheduledEventEntityType,
+  GuildScheduledEventPrivacyLevel,
+} from "discord.js";
+let client = new Client({ intents: "GuildScheduledEvents" });
 import EventsManager from "./EventsManager.js";
+import { DateTime } from "luxon";
 dotenv.config();
 
 client.on("ready", async (client) => {
   console.log("Logged in as " + client.user.tag);
-  setInterval(postEvent, 1000 * 60 * 60 * 24);
+  postEvents();
+  // setInterval(postEvents, 1000 * 60 * 60 * 24);
 });
 
-async function postEvent() {
-  let channel = client.guilds.cache
-    .get(process.env.GUILD_ID)
-    .channels.cache.get(process.env.CHANNEL_ID);
-  if (!channel) return console.log("Channel Not Found");
+async function postEvents() {
+  let guild = client.guilds.cache.get(process.env.GUILD_ID);
 
   let start = new Date();
-  start.setDate(start.getDate());
+  // start.setDate(start.getDate());
   let end = new Date();
-  end.setDate(end.getDate() + 1);
+  // end.setDate(end.getDate());
 
   let events = await new EventsManager().getEvents(start, end);
   if (events.length == 0) return console.log("No Events Today");
@@ -37,12 +40,31 @@ async function postEvent() {
       author[author.length - 2].length - 5
     );
 
-    const embed = new EmbedBuilder()
-      .setColor(0xa6bde3)
-      .setAuthor({ name: event.summary })
-      .setDescription(description)
-      .setFooter({ text: "Author: " + author });
-    channel.send({ embeds: [embed] });
+    let startTime = DateTime.fromISO(event.start.dateTime).setZone(
+      event.start.timeZone
+    );
+    startTime = startTime.setZone(event.start.timeZone);
+    let endTime = DateTime.fromISO(event.end.dateTime).setZone(
+      event.end.timeZone
+    );
+    endTime = endTime.setZone(event.end.timeZone);
+
+    if (startTime.toISOTime() == endTime.toISOTime()) {
+      endTime = endTime.plus({ hours: 1 });
+    }
+
+    let eventOptions = {
+      name: event.summary,
+      scheduledStartTime: startTime,
+      scheduledEndTime: endTime,
+      privacyLevel: GuildScheduledEventPrivacyLevel.GuildOnly,
+      entityType: GuildScheduledEventEntityType.External,
+      description: description,
+      entityMetadata: { location: "Alpha Omega" },
+      channel: guild.channels.cache.get("1014006617118883935"),
+    };
+
+    guild.scheduledEvents.create(eventOptions);
   }
 }
 
