@@ -18,7 +18,13 @@ client.on("ready", async (client) => {
     name: "the band",
     type: ActivityType.Watching,
   });
-  await new PostsManager(client).getPosts();
+
+  let postManager = new PostsManager(client);
+  await postManager.getPosts();
+
+  setInterval(async () => {
+    await postManager.getPosts();
+  }, 1000 * 60 * 10); // 10 minutes
 
   // At 00:00 on Sunday
   // https://crontab.guru/#0_0_*_*_0
