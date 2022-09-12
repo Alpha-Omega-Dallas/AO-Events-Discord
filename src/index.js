@@ -8,7 +8,8 @@ import {
 let client = new Client({ intents: "GuildScheduledEvents" });
 import EventsManager from "./EventsManager.js";
 import { DateTime } from "luxon";
-import schedule from "node-schedule";
+import schedule from "node-schedule-tz";
+import PostsManager from "./PostsManager.js";
 dotenv.config();
 
 client.on("ready", async (client) => {
@@ -17,11 +18,16 @@ client.on("ready", async (client) => {
     name: "the band",
     type: ActivityType.Watching,
   });
-  // postEvents();
+  await new PostsManager(client).getPosts();
 
   // At 00:00 on Sunday
   // https://crontab.guru/#0_0_*_*_0
-  schedule.scheduleJob("0 0 * * 0", postEvents);
+  schedule.scheduleJob(
+    "postEvents",
+    "59 23 * * 0",
+    "America/Chicago",
+    postEvents
+  );
 });
 
 async function postEvents() {
