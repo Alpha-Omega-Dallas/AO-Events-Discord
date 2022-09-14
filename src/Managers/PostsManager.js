@@ -40,4 +40,11 @@ export default class PostsManager {
         }
       });
   }
+
+  async startPostsWatcher() {
+    await this.getPosts(); // once on start
+    setInterval(async () => {
+      await this.getPosts();
+    }, 1000 * 60 * 10); // then every 10 minutes
+  }
 }
