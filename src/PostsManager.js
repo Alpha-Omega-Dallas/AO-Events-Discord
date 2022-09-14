@@ -8,7 +8,7 @@ export default class PostsManager {
 
   async getPosts() {
     let guild = await this.client.guilds.cache.get(process.env.GUILD_ID);
-    let channel = await guild.channels.fetch(process.env.CHANNEL_ID);
+    let channel = await guild.channels.fetch(process.env.BAND_CHANNEL_ID);
 
     let messages = await channel.messages.fetch();
     messages = messages.filter((m) => m.author.id == this.client.user.id);
