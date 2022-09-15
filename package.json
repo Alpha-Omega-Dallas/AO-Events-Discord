@@ -10,12 +10,14 @@
   "license": "ISC",
   "dependencies": {
     "@discordjs/rest": "^1.1.0",
+    "@discordjs/voice": "^0.11.0",
     "discord.js": "^14.3.0",
     "dotenv": "^16.0.1",
     "gcal-get-events": "^1.0.2",
     "luxon": "^3.0.3",
     "node-fetch": "^3.2.10",
     "node-schedule": "^2.1.0",
-    "node-schedule-tz": "^1.2.1-4"
+    "node-schedule-tz": "^1.2.1-4",
+    "spotify-web-api-node": "^5.0.2"
   }
 }
