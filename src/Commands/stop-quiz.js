@@ -2,9 +2,9 @@ import { SlashCommandBuilder } from "discord.js";
 
 export default {
   data: new SlashCommandBuilder()
-    .setName("start-quiz")
-    .setDescription("Start a new music quiz"),
+    .setName("stop-quiz")
+    .setDescription("Stop a music quiz"),
   async execute(interaction) {
-    interaction.client.quizManager.startQuiz(interaction);
+    interaction.client.quizManager.stopQuiz(interaction);
   },
 };

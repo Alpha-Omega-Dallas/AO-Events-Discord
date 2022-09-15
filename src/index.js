@@ -7,7 +7,11 @@ import {
   Partials,
 } from "discord.js";
 let client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildVoiceStates,
+  ],
   partials: [Partials.Channel],
 });
 
@@ -21,6 +25,7 @@ import SpotifyWebApi from "spotify-web-api-node";
 import EventsManager from "./Managers/EventsManager.js";
 import PostsManager from "./Managers/PostsManager.js";
 import SpotifyManager from "./Managers/SpotifyManager.js";
+import QuizManager from "./Managers/QuizManager.js";
 
 client.on("ready", async (client) => {
   console.log("Logged in as " + client.user.tag);
@@ -43,6 +48,7 @@ client.on("ready", async (client) => {
     console.error(error);
   }
   client.spotifyManager = await new SpotifyManager().refreshToken();
+  client.quizManager = await new QuizManager(client);
 });
 
 // client.on("messageCreate", async (message) => {
