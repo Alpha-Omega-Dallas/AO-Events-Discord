@@ -38,7 +38,7 @@ export default class QuizManager {
       "37i9dQZF1EQncLwOalG3K7"
     );
     songs = shuffle(songs);
-    if (songs.length > this.songLimit) this.songLimit = songs.length;
+    if (songs.length < this.songLimit) this.songLimit = songs.length;
 
     const connection = joinVoiceChannel({
       channelId: interaction.member.voice.channelId,
@@ -128,23 +128,46 @@ export default class QuizManager {
     collector.on("collect", (m) => {
       console.log(`Collected ${m.content}`);
 
+      for (const artist of artists) {
+        const name = artist.name;
+        if (m.content.toLowerCase().includes(name.toLowerCase())) {
+          let quiz = this.quizzes.get(interaction.member.voice.channelId);
+          if (quiz.currentSong.artistGuessed) return;
+          m.react("✅");
+          quiz.players.set(
+            m.author.id,
+            quiz.players.get(m.author.id)
+              ? quiz.players.get(m.author.id) + 1
+              : 1
+          );
+          quiz.currentSong.artistGuessed = true;
+          this.quizzes.set(interaction.member.voice.channelId, quiz);
+
+          return;
+        }
+      }
+
       if (m.content.toLowerCase().includes(name.toLowerCase())) {
-        m.react("✅");
         let quiz = this.quizzes.get(interaction.member.voice.channelId);
+        if (quiz.currentSong.nameGuessed) return;
+        m.react("✅");
         quiz.players.set(
           m.author.id,
           quiz.players.get(m.author.id) ? quiz.players.get(m.author.id) + 1 : 1
         );
+        quiz.currentSong.nameGuessed = true;
         this.quizzes.set(interaction.member.voice.channelId, quiz);
-      } else {
-        m.react("❌");
-        let quiz = this.quizzes.get(interaction.member.voice.channelId);
-        quiz.players.set(
-          m.author.id,
-          quiz.players.get(m.author.id) ? quiz.players.get(m.author.id) : 0
-        );
-        this.quizzes.set(interaction.member.voice.channelId, quiz);
+
+        return;
       }
+
+      m.react("❌");
+      let quiz = this.quizzes.get(interaction.member.voice.channelId);
+      quiz.players.set(
+        m.author.id,
+        quiz.players.get(m.author.id) ? quiz.players.get(m.author.id) : 0
+      );
+      this.quizzes.set(interaction.member.voice.channelId, quiz);
     });
 
     collector.on("end", (collected) => {
@@ -199,9 +222,20 @@ export default class QuizManager {
     clearInterval(quiz.intervalId);
     this.quizzes.set(interaction.member.voice.channelId, quiz);
 
-    let finishEmbed = new EmbedBuilder()
-      .setTitle("Quiz Finished")
-      .setDescription("Winner - 👑 Nobody 👑");
+    let finishEmbed = new EmbedBuilder().setTitle("Quiz Finished");
+
+    let players = "";
+    await quiz.players.forEach(async (value, key) => {
+      players +=
+        (await this.client.users.cache.get(key).username) + ": " + value + "\n";
+    });
+
+    finishEmbed.setDescription(
+      "**Leaderboard**\n" +
+        "```" +
+        (players ? players : "Nobody guessed") +
+        "```"
+    );
 
     if (source == "stopQuiz") {
       interaction.reply({ embeds: [finishEmbed] });
