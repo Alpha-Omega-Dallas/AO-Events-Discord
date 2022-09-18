@@ -35,8 +35,10 @@ export default class QuizManager {
 
     // get interaction choice for genre and use according playlist id
     let songs = await new SongManager(interaction.client).getSongsFromPlaylist(
-      "37i9dQZF1EQncLwOalG3K7"
+      "1KGklXGm7cwWew80wtanCj"
     );
+    // 1KGklXGm7cwWew80wtanCj christopher's liked songs
+    // 37i9dQZF1EQncLwOalG3K7 pop songs
     songs = shuffle(songs);
     if (songs.length < this.songLimit) this.songLimit = songs.length;
 
@@ -124,10 +126,7 @@ export default class QuizManager {
       time: 1000 * 30,
     });
 
-    console.log(name);
     collector.on("collect", (m) => {
-      console.log(`Collected ${m.content}`);
-
       for (const artist of artists) {
         const name = artist.name;
         if (m.content.toLowerCase().includes(name.toLowerCase())) {
@@ -170,9 +169,7 @@ export default class QuizManager {
       this.quizzes.set(interaction.member.voice.channelId, quiz);
     });
 
-    collector.on("end", (collected) => {
-      console.log(`Collected ${collected.size} items`);
-    });
+    collector.on("end", (collected) => {});
   }
 
   async songEmbed(channelId, interaction) {
@@ -212,8 +209,7 @@ export default class QuizManager {
   }
 
   async finishQuiz(interaction, source) {
-    if (!this.quizzes.get(interaction.member.voice.channelId))
-      return console.error("There is no quiz in this channel");
+    if (!this.quizzes.get(interaction.member.voice.channelId)) return;
 
     let quiz = this.quizzes.get(interaction.member.voice.channelId);
     quiz.player.stop();
