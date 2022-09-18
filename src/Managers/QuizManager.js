@@ -35,7 +35,7 @@ export default class QuizManager {
 
     // get interaction choice for genre and use according playlist id
     let songs = await new SongManager(interaction.client).getSongsFromPlaylist(
-      "1KGklXGm7cwWew80wtanCj"
+      "37i9dQZF1EQncLwOalG3K7"
     );
     // 1KGklXGm7cwWew80wtanCj christopher's liked songs
     // 37i9dQZF1EQncLwOalG3K7 pop songs
@@ -192,18 +192,15 @@ export default class QuizManager {
       .setFooter({ text: `Song ${song.index}/${this.songLimit}` })
       .setThumbnail(song.image);
 
-    let players = "";
-    await quiz.players.forEach(async (value, key) => {
+    var players = "";
+    for (let [key, value] of quiz.players) {
       players +=
         (await this.client.users.cache.get(key).username) + ": " + value + "\n";
-    });
+    }
 
-    songEmbed.setDescription(
-      "**Leaderboard**\n" +
-        "```" +
-        (players ? players : "Nobody guessed") +
-        "```"
-    );
+    if (players) {
+      songEmbed.setDescription("**Leaderboard**\n" + "```" + players + "```");
+    }
 
     await interaction.channel.send({ embeds: [songEmbed] });
   }
@@ -220,18 +217,15 @@ export default class QuizManager {
 
     let finishEmbed = new EmbedBuilder().setTitle("Quiz Finished");
 
-    let players = "";
-    await quiz.players.forEach(async (value, key) => {
+    var players = "";
+    for (let [key, value] of quiz.players) {
       players +=
         (await this.client.users.cache.get(key).username) + ": " + value + "\n";
-    });
+    }
 
-    finishEmbed.setDescription(
-      "**Leaderboard**\n" +
-        "```" +
-        (players ? players : "Nobody guessed") +
-        "```"
-    );
+    if (players) {
+      finishEmbed.setDescription("**Leaderboard**\n" + "```" + players + "```");
+    }
 
     if (source == "stopQuiz") {
       interaction.reply({ embeds: [finishEmbed] });
@@ -248,6 +242,12 @@ export default class QuizManager {
       });
 
     if (!this.quizzes.get(interaction.member.voice.channelId))
+      return interaction.reply({
+        content: "There is no quiz in this channel",
+        ephemeral: true,
+      });
+
+    if (!this.quizzes.get(interaction.member.voice.channelId).isActive)
       return interaction.reply({
         content: "There is no quiz in this channel",
         ephemeral: true,
