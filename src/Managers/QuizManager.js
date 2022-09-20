@@ -6,6 +6,7 @@ import {
 import { EmbedBuilder } from "discord.js";
 import SongManager from "../Managers/SongManager.js";
 import { shuffle, sleep } from "../utils.js";
+import he from "he";
 
 export default class QuizManager {
   constructor(client) {
@@ -30,15 +31,62 @@ export default class QuizManager {
       }
     }
 
-    const embed = new EmbedBuilder().setTitle("Quiz Starting");
+    var spotifyIdRegex = new RegExp(
+      "^(https://open.spotify.com/playlist/)([a-zA-Z0-9]+)(.*)$",
+      "g"
+    );
+    var match = spotifyIdRegex.exec(
+      interaction.options.getString("spotify-playlist-url")
+    );
+    if (!match)
+      return interaction.reply({
+        content: "Invalid playlist url",
+        ephemeral: true,
+      });
+    try {
+      let test = match[2];
+    } catch (error) {
+      return interaction.reply({
+        content: "Invalid playlist url",
+        ephemeral: true,
+      });
+    }
+
+    let playlistInfo;
+    try {
+      playlistInfo = await new SongManager(this.client).getPlaylistInfo(
+        match[2]
+      );
+    } catch (error) {
+      return interaction.reply({
+        content: "Playlist is private",
+        ephemeral: true,
+      });
+    }
+
+    let songs = await await new SongManager(this.client).getSongsFromPlaylist(
+      match[2]
+    );
+
+    if (songs.length <= 1)
+      return interaction.reply({
+        content: "Playlist has no playable songs or is too short",
+        ephemeral: true,
+      });
+
+    const embed = new EmbedBuilder()
+      .setTitle("Quiz Starting")
+      .setDescription(
+        `**Playlist Name**\t${he.decode(playlistInfo.name)}\n` +
+          (playlistInfo.description
+            ? `**Description**\t${he.decode(playlistInfo.description)}\n`
+            : "") +
+          `**Followers**\t${playlistInfo.followers.total}`
+      )
+      .setThumbnail(playlistInfo.images[0].url)
+      .setColor(0x1db954);
     await interaction.reply({ embeds: [embed] });
 
-    // get interaction choice for genre and use according playlist id
-    let songs = await new SongManager(interaction.client).getSongsFromPlaylist(
-      "37i9dQZF1EQncLwOalG3K7"
-    );
-    // 1KGklXGm7cwWew80wtanCj christopher's liked songs
-    // 37i9dQZF1EQncLwOalG3K7 pop songs
     songs = shuffle(songs);
     if (songs.length < this.songLimit) this.songLimit = songs.length;
 
@@ -77,8 +125,12 @@ export default class QuizManager {
       } else {
         await this.songEmbed(interaction.member.voice.channelId, interaction);
       }
-
-      if (quiz.currentSong.index >= this.songLimit) {
+      console.log(
+        `current song: ${quiz.currentSong.index + 1} songLimit: ${
+          this.songLimit
+        }`
+      );
+      if (quiz.currentSong.index == this.songLimit) {
         await this.finishQuiz(interaction);
       }
       await this.nextSong(interaction.member.voice.channelId, interaction);
@@ -120,13 +172,17 @@ export default class QuizManager {
 
     let { name, artists } = quiz.currentSong;
 
-    const filter = (m) => m.author.id != this.client.user.id;
+    const filter = (m) =>
+      m.author.id != this.client.user.id && m.author.bot != true;
     const collector = interaction.channel.createMessageCollector({
       filter,
       time: 1000 * 30,
     });
 
     collector.on("collect", (m) => {
+      let quizzz = this.quizzes.get(interaction.member.voice.channelId);
+      if (!quizzz.isActive) return;
+
       for (const artist of artists) {
         const name = artist.name;
         if (m.content.toLowerCase().includes(name.toLowerCase())) {
@@ -142,11 +198,18 @@ export default class QuizManager {
           quiz.currentSong.artistGuessed = true;
           this.quizzes.set(interaction.member.voice.channelId, quiz);
 
+          if (quiz.nameGuessed) {
+            // this.skipSong()
+          }
+
           return;
         }
       }
 
-      if (m.content.toLowerCase().includes(name.toLowerCase())) {
+      console.log(name.split(/\(.*\)/)[0].toLowerCase());
+      if (
+        m.content.toLowerCase().includes(name.split(/\(.*\)/)[0].toLowerCase())
+      ) {
         let quiz = this.quizzes.get(interaction.member.voice.channelId);
         if (quiz.currentSong.nameGuessed) return;
         m.react("✅");
@@ -156,6 +219,10 @@ export default class QuizManager {
         );
         quiz.currentSong.nameGuessed = true;
         this.quizzes.set(interaction.member.voice.channelId, quiz);
+
+        if (quiz.artistGuessed) {
+          // this.skipSong()
+        }
 
         return;
       }
@@ -195,7 +262,12 @@ export default class QuizManager {
     var players = "";
     for (let [key, value] of quiz.players) {
       players +=
-        (await this.client.users.cache.get(key).username) + ": " + value + "\n";
+        (await interaction.guild.members.cache
+          .get(key)
+          .nickname.split(" ")[0]) +
+        /* (await this.client.users.cache.get(key).username) */ ": " +
+        value +
+        "\n";
     }
 
     if (players) {
@@ -220,7 +292,12 @@ export default class QuizManager {
     var players = "";
     for (let [key, value] of quiz.players) {
       players +=
-        (await this.client.users.cache.get(key).username) + ": " + value + "\n";
+        (await interaction.guild.members.cache
+          .get(key)
+          .nickname.split(" ")[0]) +
+        /* (await this.client.users.cache.get(key).username) */ ": " +
+        value +
+        "\n";
     }
 
     if (players) {

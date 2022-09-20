@@ -7,15 +7,23 @@ export default class SongManager {
     this.spotifyApi.setAccessToken(client.spotifyManager.access_token);
   }
 
+  async getPlaylistInfo(playlistId) {
+    let data = await this.spotifyApi.getPlaylist(playlistId, {
+      fields: "description, owner, images, followers, external_urls, name",
+    });
+
+    return data.body;
+  }
+
   async getSongsFromPlaylist(playlistId) {
-    // 6dDOsnFsPkuKBioZlXeEEX
-    // tracks(items(track.preview_url))
     let data = await this.spotifyApi.getPlaylist(playlistId, {
       fields: "tracks(items(track(name, artists, preview_url, album(images))))",
     });
 
     const songs = [];
     for (const item of data.body.tracks.items) {
+      if (!item) continue;
+      if (!item.track) continue;
       if (item.track.preview_url)
         songs.push({
           name: item.track.name,
