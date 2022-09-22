@@ -26,6 +26,7 @@ import EventsManager from "./Managers/EventsManager.js";
 import PostsManager from "./Managers/PostsManager.js";
 import SpotifyManager from "./Managers/SpotifyManager.js";
 import QuizManager from "./Managers/QuizManager.js";
+import HubManager from "./Managers/HubManager.js";
 
 client.on("ready", async (client) => {
   console.log("Logged in as " + client.user.tag);
@@ -49,6 +50,7 @@ client.on("ready", async (client) => {
   }
   client.spotifyManager = await new SpotifyManager().refreshToken();
   client.quizManager = await new QuizManager(client);
+  client.hubManager = await new HubManager(client).setup();
 });
 
 client.on("interactionCreate", async (interaction) => {
