@@ -11,7 +11,7 @@ export default {
         .setRequired(true)
     ),
   async execute(interaction) {
-    interaction.reply({ content: "Work in progress", ephemeral: true });
-    // interaction.client.quizManager.startQuiz(interaction);
+    // interaction.reply({ content: "Work in progress", ephemeral: true });
+    interaction.client.quizManager.startQuiz(interaction);
   },
 };

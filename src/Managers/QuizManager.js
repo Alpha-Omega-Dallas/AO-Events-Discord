@@ -125,11 +125,7 @@ export default class QuizManager {
       } else {
         await this.songEmbed(interaction.member.voice.channelId, interaction);
       }
-      console.log(
-        `current song: ${quiz.currentSong.index + 1} songLimit: ${
-          this.songLimit
-        }`
-      );
+
       if (quiz.currentSong.index == this.songLimit) {
         await this.finishQuiz(interaction);
       }
@@ -149,7 +145,7 @@ export default class QuizManager {
     let quiz = this.quizzes.get(channelId);
     if (!quiz.isActive) return;
 
-    let nextSong = quiz.songs[quiz.currentSong.index + 1];
+    let nextSong = quiz.songs[quiz.currentSong.index];
     quiz.player.stop();
     await sleep(1000 * 1.5); // Give us a break between songs
     quiz.player.play(createAudioResource(nextSong.previewUrl));
@@ -206,9 +202,16 @@ export default class QuizManager {
         }
       }
 
-      console.log(name.split(/\(.*\)/)[0].toLowerCase());
       if (
-        m.content.toLowerCase().includes(name.split(/\(.*\)/)[0].toLowerCase())
+        m.content
+          .toLowerCase()
+          .trim()
+          .includes(
+            name
+              .split(/\(.*\)/)[0]
+              .toLowerCase()
+              .trim()
+          )
       ) {
         let quiz = this.quizzes.get(interaction.member.voice.channelId);
         if (quiz.currentSong.nameGuessed) return;
@@ -264,7 +267,7 @@ export default class QuizManager {
       players +=
         (await interaction.guild.members.cache
           .get(key)
-          .nickname.split(" ")[0]) +
+          .displayName.split(" ")[0]) +
         /* (await this.client.users.cache.get(key).username) */ ": " +
         value +
         "\n";
@@ -294,7 +297,7 @@ export default class QuizManager {
       players +=
         (await interaction.guild.members.cache
           .get(key)
-          .nickname.split(" ")[0]) +
+          .displayName.split(" ")[0]) +
         /* (await this.client.users.cache.get(key).username) */ ": " +
         value +
         "\n";
