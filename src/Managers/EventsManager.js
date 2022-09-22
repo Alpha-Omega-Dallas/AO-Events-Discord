@@ -1,3 +1,7 @@
+import {
+  GuildScheduledEventEntityType,
+  GuildScheduledEventPrivacyLevel,
+} from "discord.js";
 import { getEvents } from "gcal-get-events";
 import { DateTime } from "luxon";
 import schedule from "node-schedule-tz";
@@ -93,5 +97,6 @@ export default class EventsManager {
       "America/Chicago",
       this.postEvents
     );
+    return this;
   }
 }
