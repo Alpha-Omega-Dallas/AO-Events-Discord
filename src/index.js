@@ -17,6 +17,7 @@ let client = new Client({
 });
 
 // NPM Modules
+import chalk from "chalk";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -29,7 +30,9 @@ import HubManager from "./Managers/HubManager.js";
 import CommandsManager from "./Managers/CommandsManager.js";
 
 client.on("ready", async (client) => {
-  console.log("Logged in as " + client.user.tag);
+  console.log(
+    chalk.blue.bold("[BOT]") + " Logged in as " + chalk.green(client.user.tag)
+  );
   client.user.setActivity({
     name: "the band",
     type: ActivityType.Watching,

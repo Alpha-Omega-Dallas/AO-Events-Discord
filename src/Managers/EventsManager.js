@@ -5,6 +5,7 @@ import {
 import { getEvents } from "gcal-get-events";
 import { DateTime } from "luxon";
 import schedule from "node-schedule-tz";
+import chalk from "chalk";
 
 export default class EventsManager {
   constructor(client) {
@@ -44,7 +45,8 @@ export default class EventsManager {
     end.setDate(end.getDate() + 7);
 
     let events = await this.getEvents(start, end);
-    if (events.length == 0) return console.log("No Events This Time");
+    if (events.length == 0)
+      return console.log(chalk.yellow("[Events]") + " No Events This Time");
 
     for (const event of events) {
       let author = event.description.trim().split(/\((.*?)\)/);
