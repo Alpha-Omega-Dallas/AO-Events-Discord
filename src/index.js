@@ -18,7 +18,6 @@ let client = new Client({
 
 // NPM Modules
 import dotenv from "dotenv";
-import CommandsManager from "./Managers/CommandsManager.js";
 dotenv.config();
 
 // Managers
@@ -27,6 +26,7 @@ import PostsManager from "./Managers/PostsManager.js";
 import SpotifyManager from "./Managers/SpotifyManager.js";
 import QuizManager from "./Managers/QuizManager.js";
 import HubManager from "./Managers/HubManager.js";
+import CommandsManager from "./Managers/CommandsManager.js";
 
 client.on("ready", async (client) => {
   console.log("Logged in as " + client.user.tag);
@@ -39,7 +39,7 @@ client.on("ready", async (client) => {
   client.commands = new Collection();
 
   // Managers
-  client.eventsManager = await new EventsManager(client).startEventsWatcher();
+  // client.eventsManager = await new EventsManager(client).startEventsWatcher();
   client.postsManager = await new PostsManager(client).startPostsWatcher();
   client.commandsManager = await new CommandsManager(client);
   try {

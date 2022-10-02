@@ -86,6 +86,8 @@ export default class EventsManager {
 
       guild.scheduledEvents.create(eventOptions);
     }
+
+    return this;
   }
 
   async startEventsWatcher() {
