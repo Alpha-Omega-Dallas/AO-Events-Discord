@@ -17,9 +17,21 @@ let client = new Client({
 });
 
 // NPM Modules
+import { DisTube } from "distube";
+import { YtDlpPlugin } from "@distube/yt-dlp";
+import { SpotifyPlugin } from "@distube/spotify";
 import chalk from "chalk";
 import dotenv from "dotenv";
 dotenv.config();
+
+// Distube setup
+client.distube = new DisTube(client, {
+  leaveOnStop: true,
+  emitNewSongOnly: true,
+  emitAddSongWhenCreatingQueue: false,
+  emitAddListWhenCreatingQueue: false,
+  plugins: [new YtDlpPlugin({ update: true }), new SpotifyPlugin()],
+});
 
 // Managers
 import EventsManager from "./Managers/EventsManager.js";
@@ -28,6 +40,7 @@ import SpotifyManager from "./Managers/SpotifyManager.js";
 import QuizManager from "./Managers/QuizManager.js";
 import HubManager from "./Managers/HubManager.js";
 import CommandsManager from "./Managers/CommandsManager.js";
+import DistubeManager from "./Managers/DistubeManager.js";
 
 client.on("ready", async (client) => {
   console.log(
@@ -54,6 +67,7 @@ client.on("ready", async (client) => {
   client.spotifyManager = await new SpotifyManager().refreshToken();
   client.quizManager = await new QuizManager(client);
   client.hubManager = await new HubManager(client).setup();
+  client.distubeManager = await new DistubeManager(client).setupEmitListeners();
 });
 
 client.on("interactionCreate", async (interaction) => {
